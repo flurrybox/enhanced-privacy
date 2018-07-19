@@ -39,7 +39,7 @@ $helper = $this->helper(Data::class);
             <div class="actions-toolbar">
                 <div class="primary">
                     <button type="button" class="action submit primary" id="export">
-                        <span><?php echo __('Export my data'); ?></span>
+                        <span><?php echo $block->escapeHtml($helper->getExportButtonText()); ?></span>
                     </button>
                 </div>
             </div>
@@ -72,7 +72,7 @@ $helper = $this->helper(Data::class);
             <div class="actions-toolbar">
                 <div class="primary">
                     <button type="button" class="button-red action submit primary" id="delete">
-                        <span><?php echo __('Delete my account'); ?></span>
+                        <span><?php echo $block->escapeHtml($helper->getAccountDeletionButtonText()); ?></span>
                     </button>
                 </div>
             </div>
