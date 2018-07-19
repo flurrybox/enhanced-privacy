@@ -42,7 +42,9 @@ class Data extends AbstractHelper
     const CONFIG_ACCOUNT_EXPORT_INFORMATION = 'customer/enhancedprivacy/export/export_information';
     const CONFIG_ACCOUNT_POPUP_NOTIFICATION_ENABLED = 'customer/enhancedprivacy/cookie/popup_notification_enabled';
     const CONFIG_ACCOUNT_POPUP_TEXT = 'customer/enhancedprivacy/cookie/popup_text';
-
+    
+    const CONFIG_ACCOUNT_DELETION_BUTTON_TEXT = 'customer/enhancedprivacy/account/account_deletion_button_text';
+	const CONFIG_EXPORT_DATA_BUTTON_TEXT = 'customer/enhancedprivacy/export/export_button_text';
     /**
      * Schedule types
      */
@@ -206,4 +208,25 @@ class Data extends AbstractHelper
     {
         return $this->scopeConfig->getValue(self::CONFIG_ACCOUNT_POPUP_TEXT, ScopeInterface::SCOPE_STORE);
     }
+    
+    /**
+     * Get account deletion button text
+     *
+     * @return string|null
+     */    
+    public function getAccountDeletionButtonText()
+    {
+        return $this->scopeConfig->getValue(self::CONFIG_ACCOUNT_DELETION_BUTTON_TEXT, ScopeInterface::SCOPE_STORE);
+    }
+    
+    /**
+     * Get account deletion button text
+     *
+     * @return string|null
+     */    
+    public function getExportButtonText()
+    {
+        return $this->scopeConfig->getValue(self::CONFIG_EXPORT_DATA_BUTTON_TEXT, ScopeInterface::SCOPE_STORE);
+    }
+    
 }
