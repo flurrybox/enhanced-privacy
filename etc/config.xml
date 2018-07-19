@@ -27,7 +27,7 @@
                     <account_deletion_enabled>0</account_deletion_enabled>
                     <deletion_schema>0</deletion_schema>
                     <deletion_time>60</deletion_time>
-                    <account_deletion_title>Account deletion</account_deletion_title>
+        	    <!-- <account_deletion_title>Account deletion</account_deletion_title> -->
                     <account_deletion_button_text>Delete my account</account_deletion_button_text>
                     <account_export_enabled>0</account_export_enabled>
                     <success_message>You have requested your account to be deleted. It will be automatically deleted within 1 hour.</success_message>
@@ -37,6 +37,7 @@
                 </account>
                 <export>
                     <export_information>You can export the data we have about you using the button below.</export_information>
+                    <export_button_text>Export my data</export_button_text>
                 </export>
                 <cookie>
                     <popup_notification_enabled>1</popup_notification_enabled>
@@ -46,3 +47,4 @@
         </customer>
     </default>
 </config>
+
