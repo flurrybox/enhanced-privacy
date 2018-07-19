@@ -21,10 +21,11 @@
         <referenceBlock name="customer_account_navigation">
             <block class="Magento\Framework\View\Element\Html\Link\Current"
                    ifconfig="customer/enhancedprivacy/general/enable"
-                   name="customer_account_navigation_privacy_link" after="customer-account-navigation-wish-list-link">
+                   name="customer_account_navigation_privacy_link" >
                 <arguments>
                     <argument name="path" xsi:type="string">privacy/settings</argument>
                     <argument name="label" xsi:type="string">Privacy settings</argument>
+                    <argument name="sortOrder" xsi:type="number">9999</argument>
                 </arguments>
             </block>
         </referenceBlock>
