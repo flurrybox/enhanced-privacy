@@ -65,7 +65,7 @@ $helper = $this->helper(Data::class);
         <div class="actions-toolbar">
             <div class="primary">
                 <button type="button" class="button-red action submit primary" id="delete">
-                    <span><?php echo __('Delete my account'); ?></span>
+                    <span><?php echo $block->escapeHtml(__($helper->getAccountDeletionButtonText()));  ?></span>
                 </button>
             </div>
             <div class="secondary">
