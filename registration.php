@@ -14,8 +14,6 @@
  * file that was distributed with this source code.
  */
 
-\Magento\Framework\Component\ComponentRegistrar::register(
-    \Magento\Framework\Component\ComponentRegistrar::MODULE,
-    'Flurrybox_EnhancedPrivacy',
-    __DIR__
-);
+use Magento\Framework\Component\ComponentRegistrar;
+
+ComponentRegistrar::register(ComponentRegistrar::MODULE, 'Flurrybox_EnhancedPrivacy', __DIR__);

@@ -36,11 +36,14 @@ define([
 
             this.showPopUp(!$.cookie(this.cookieName));
             this.popupText(this.notificationText);
+        },
 
-            $(document).on('click', '#enhanced-privacy-popup-agree', function () {
-                this.showPopUp(false);
-                $.cookie(this.cookieName, 1);
-            }.bind(this));
+        /**
+         * Agree to privacy policy.
+         */
+        agreeToPolicy: function () {
+            this.showPopUp(false);
+            $.cookie(this.cookieName, 1);
         },
 
         /**

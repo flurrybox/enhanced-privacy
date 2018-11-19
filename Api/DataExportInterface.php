@@ -20,6 +20,9 @@ use Magento\Customer\Api\Data\CustomerInterface;
 
 /**
  * Customer data export interface.
+ *
+ * @api
+ * @since 1.0.0
  */
 interface DataExportInterface
 {
@@ -33,7 +36,7 @@ interface DataExportInterface
      *          ...
      *      )
      *
-     * @param CustomerInterface $customer
+     * @param \Magento\Customer\Api\Data\CustomerInterface $customer
      *
      * @return array
      */

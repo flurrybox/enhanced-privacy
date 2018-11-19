@@ -14,11 +14,15 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Flurrybox\EnhancedPrivacy\Setup;
 
+use Flurrybox\EnhancedPrivacy\Api\Data\CustomerManagementInterface;
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Setup\CustomerSetupFactory;
 use Magento\Eav\Model\Entity\Attribute\Source\Boolean;
+use Magento\Eav\Model\ResourceModel\Entity\Attribute as AttributeResource;
 use Magento\Framework\Setup\InstallDataInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
@@ -28,21 +32,26 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
  */
 class InstallData implements InstallDataInterface
 {
-    const IS_ANONYMIZED_ATTRIBUTE = 'is_anonymized';
-
     /**
      * @var CustomerSetupFactory
      */
     protected $customerSetupFactory;
 
     /**
+     * @var AttributeResource
+     */
+    protected $attributeResource;
+
+    /**
      * InstallData constructor.
      *
      * @param CustomerSetupFactory $customerSetupFactory
+     * @param AttributeResource $attributeResource
      */
-    public function __construct(CustomerSetupFactory $customerSetupFactory)
+    public function __construct(CustomerSetupFactory $customerSetupFactory, AttributeResource $attributeResource)
     {
         $this->customerSetupFactory = $customerSetupFactory;
+        $this->attributeResource = $attributeResource;
     }
 
     /**
@@ -60,37 +69,20 @@ class InstallData implements InstallDataInterface
         $installer = $setup;
         $installer->startSetup();
 
-        $customerSetup = $this->customerSetupFactory->create(['setup' => $setup]);
-        $customerSetup->removeAttribute(Customer::ENTITY, self::IS_ANONYMIZED_ATTRIBUTE);
+        $customerSetup = $this->customerSetupFactory->create();
+        $customerSetup->removeAttribute(Customer::ENTITY, CustomerManagementInterface::ATTRIBUTE_IS_ANONYMIZED);
 
-        $customerSetup->addAttribute(Customer::ENTITY, self::IS_ANONYMIZED_ATTRIBUTE, array(
+        $customerSetup->addAttribute(Customer::ENTITY, CustomerManagementInterface::ATTRIBUTE_IS_ANONYMIZED, [
             'type' => 'int',
-            'label' => 'Is Anonimyzed',
+            'label' => 'Is Anonymized',
             'input' => 'select',
             'source' => Boolean::class,
-            'visible' => true,
+            'system' => false,
+            'user_defined' => false,
+            'visible' => false,
             'default' => 0,
-            'required' => false,
-        ));
-
-
-        $attribute = $customerSetup->getEavConfig()->getAttribute(Customer::ENTITY, self::IS_ANONYMIZED_ATTRIBUTE);
-
-        $attribute
-            ->setData('used_in_forms', [
-                'adminhtml_customer',
-                'checkout_register',
-                'customer_account_create',
-                'customer_account_edit',
-                'adminhtml_checkout'
-            ])
-            ->setData('is_used_for_customer_segment', true)
-            ->setData('is_system', 0)
-            ->setData('is_user_defined', 1)
-            ->setData('is_visible', 1)
-            ->setData('sort_order', 100);
-
-        $attribute->getResource()->save($attribute);
+            'required' => false
+        ]);
 
         $installer->endSetup();
     }

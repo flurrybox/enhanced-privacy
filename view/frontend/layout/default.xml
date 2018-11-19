@@ -19,14 +19,13 @@
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="after.body.start">
-            <block class="Flurrybox\EnhancedPrivacy\Block\Messages\PrivacyMessagePopup" name="privacy_message_popup"
-                   template="Flurrybox_EnhancedPrivacy::messages/popup.phtml" after="-">
+            <block class="Flurrybox\EnhancedPrivacy\Block\Customer\PrivacyPopup" name="privacy_popup" after="-">
                 <arguments>
                     <argument name="jsLayout" xsi:type="array">
                         <item name="components" xsi:type="array">
-                            <item name="enhanced-privacy-cookie-policy" xsi:type="array">
+                            <item name="enhancedprivacy-cookie-policy" xsi:type="array">
                                 <item name="component" xsi:type="string">Flurrybox_EnhancedPrivacy/js/view/popup</item>
-                                <item name="displayArea" xsi:type="string">enhanced-privacy-cookie-policy</item>
+                                <item name="displayArea" xsi:type="string">enhancedprivacy-cookie-policy</item>
                             </item>
                         </item>
                     </argument>

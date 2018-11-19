@@ -18,10 +18,13 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <update handle="customer_account"/>
+    <head>
+        <title>Privacy settings</title>
+    </head>
     <body>
         <referenceContainer name="content">
-            <block class="Flurrybox\EnhancedPrivacy\Block\Account\Settings" name="privacy_settings" cacheable="false"
-                   template="Flurrybox_EnhancedPrivacy::account/settings.phtml"/>
+            <block class="Flurrybox\EnhancedPrivacy\Block\Customer\Privacy\Settings" name="privacy_settings"
+                   cacheable="false"/>
         </referenceContainer>
     </body>
 </page>

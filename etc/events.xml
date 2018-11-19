@@ -18,6 +18,6 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
     <event name="controller_action_predispatch">
-        <observer name="EnhancedPrivacy_customer_logout" instance="Flurrybox\EnhancedPrivacy\Observers\CustomerLogout"/>
+        <observer name="enhancedprivacy_customer_logout" instance="Flurrybox\EnhancedPrivacy\Observer\Customer\Logout"/>
     </event>
 </config>

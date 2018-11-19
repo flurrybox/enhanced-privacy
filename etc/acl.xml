@@ -20,8 +20,13 @@
     <acl>
         <resources>
             <resource id="Magento_Backend::admin">
-                <resource id="Flurrybox_EnhancedPrivacy::enhancedprivacy" title="Enhanced Privacy" sortOrder="80">
-                    <resource id="Flurrybox_EnhancedPrivacy::settings" title="Privacy settings" sortOrder="80"/>
+                <resource id="Flurrybox_EnhancedPrivacy::enhancedprivacy" title="Enhanced Privacy" sortOrder="100">
+                    <resource id="Flurrybox_EnhancedPrivacy::enhancedprivacy_settings" title="Change Configuration"
+                              sortOrder="10"/>
+                    <resource id="Flurrybox_EnhancedPrivacy::enhancedprivacy_view_reasons" title="View Deletion Reasons"
+                              sortOrder="20"/>
+                    <resource id="Flurrybox_EnhancedPrivacy::enhancedprivacy_delete_reasons" sortOrder="30"
+                              title="Delete Deletion Reasons"/>
                 </resource>
             </resource>
         </resources>

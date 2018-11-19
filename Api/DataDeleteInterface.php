@@ -20,24 +20,27 @@ use Magento\Customer\Api\Data\CustomerInterface;
 
 /**
  * Data deletion and anonymization interface.
+ *
+ * @api
+ * @since 1.0.0
  */
 interface DataDeleteInterface
 {
     /**
      * Executed upon customer data deletion.
      *
-     * @param CustomerInterface $customer
+     * @param \Magento\Customer\Api\Data\CustomerInterface $customer
      *
-     * @return mixed
+     * @return void
      */
     public function delete(CustomerInterface $customer);
 
     /**
      * Executed upon customer data anonymization.
      *
-     * @param CustomerInterface $customer
+     * @param \Magento\Customer\Api\Data\CustomerInterface $customer
      *
-     * @return mixed
+     * @return void
      */
     public function anonymize(CustomerInterface $customer);
 }

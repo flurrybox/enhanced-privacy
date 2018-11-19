@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * This file is part of the Flurrybox EnhancedPrivacy package.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade Flurrybox EnhancedPrivacy
+ * to newer versions in the future.
+ *
+ * @copyright Copyright (c) 2018 Flurrybox, Ltd. (https://flurrybox.com/)
+ * @license   GNU General Public License ("GPL") v3.0
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Flurrybox\Core\Model\Extensions">
+        <arguments>
+            <argument name="extensions" xsi:type="array">
+                <item name="enhancedPrivacyMetaData"
+                      xsi:type="object">Flurrybox\EnhancedPrivacy\Model\ExtensionMetaData</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Flurrybox\EnhancedPrivacy\Model\ExtensionMetaData" type="Flurrybox\Core\Model\ExtensionMetaData">
+        <arguments>
+            <argument name="name" xsi:type="string">Enhanced Privacy</argument>
+            <argument name="description" xsi:type="string"
+                      translatable="true">Magento 2 module to make your store GDPR compatible</argument>
+            <argument name="identificationCode" xsi:type="string">enhanced-privacy</argument>
+            <argument name="version" xsi:type="string">2.0.0</argument>
+            <argument name="storePage" xsi:type="string">https://flurrybox.com/enhanced-privacy.html</argument>
+            <argument name="helpPage" xsi:type="string">https://flurrybox.com/kb/enhanced-privacy.html</argument>
+        </arguments>
+    </virtualType>
+</config>

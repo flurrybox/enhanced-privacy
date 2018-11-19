@@ -14,8 +14,12 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Flurrybox\EnhancedPrivacy\Setup;
 
+use Flurrybox\EnhancedPrivacy\Api\Data\ReasonInterface;
+use Flurrybox\EnhancedPrivacy\Api\Data\ScheduleInterface;
 use Magento\Framework\DB\Ddl\Table;
 use Magento\Framework\Setup\InstallSchemaInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
@@ -35,90 +39,83 @@ class InstallSchema implements InstallSchemaInterface
      */
     public function install(SchemaSetupInterface $setup, ModuleContextInterface $context)
     {
-        $installer = $setup;
-        $installer->startSetup();
+        $setup->startSetup();
 
-        /**
-         * Create table 'flurrybox_enhancedprivacy_delete_reasons'
-         */
-        $table = $installer->getConnection()
-            ->newTable($installer->getTable('flurrybox_enhancedprivacy_delete_reasons'))
+        $table = $setup->getConnection()
+            ->newTable($setup->getTable(ReasonInterface::TABLE))
             ->addColumn(
-                'reason_id',
+                ReasonInterface::ID,
                 Table::TYPE_SMALLINT,
                 null,
                 ['identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true],
-                'Status id'
+                'Reason Id'
             )->addColumn(
-                'reason',
+                ReasonInterface::REASON,
                 Table::TYPE_TEXT,
                 null,
                 ['nullable' => false],
-                'Reason text'
+                'Reason'
             )
             ->addColumn(
-                'created_at',
+                ReasonInterface::CREATED_AT,
                 Table::TYPE_TIMESTAMP,
                 null,
                 ['nullable' => false, 'default' => Table::TIMESTAMP_INIT],
                 'Created At'
             )
-            ->setComment('Comments statuses');
+            ->setComment('Deletion Reasons');
 
-        $installer->getConnection()->createTable($table);
+        $setup->getConnection()->createTable($table);
 
-        /**
-         * Create table 'flurrybox_enhancedprivacy_cleanup_schedule'
-         */
-        $table = $installer->getConnection()
-            ->newTable($installer->getTable('flurrybox_enhancedprivacy_cleanup_schedule'))
+        $table = $setup->getConnection()
+            ->newTable($setup->getTable(ScheduleInterface::TABLE))
             ->addColumn(
-                'schedule_id',
+                ScheduleInterface::ID,
                 Table::TYPE_SMALLINT,
                 null,
                 ['identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true],
-                'Id of schedule item'
+                'Schedule Id'
             )
             ->addColumn(
-                'scheduled_at',
+                ScheduleInterface::SCHEDULED_AT,
                 Table::TYPE_TIMESTAMP,
                 null,
-                ['nullable' => false, 'default' => Table::TIMESTAMP_INIT],
+                ['nullable' => true],
                 'Scheduled At'
             )
             ->addColumn(
-                'customer_id',
+                ScheduleInterface::CUSTOMER_ID,
                 Table::TYPE_INTEGER,
                 null,
                 ['nullable' => false],
-                'Customer entity Id'
+                'Customer Id'
             )
             ->addColumn(
-                'type',
+                ScheduleInterface::TYPE,
                 Table::TYPE_TEXT,
                 255,
                 ['nullable' => false],
-                'Action type'
+                'Type'
             )
             ->addColumn(
-                'reason',
-                Table::TYPE_TEXT,
+                ScheduleInterface::REASON_ID,
+                Table::TYPE_INTEGER,
                 null,
                 ['nullable' => false],
-                'Reason text'
+                'Reason Id'
             )
             ->addIndex(
                 $setup->getIdxName(
-                    'flurrybox_enhancedprivacy_cleanup_schedule',
-                    ['customer_id'],
+                    ScheduleInterface::TABLE,
+                    [ScheduleInterface::CUSTOMER_ID],
                     true
                 ),
-                ['customer_id'],
+                [ScheduleInterface::CUSTOMER_ID],
                 ['type' => 'unique']
             )
             ->setComment('Account Cleanup Schedule');
 
-        $installer->getConnection()->createTable($table);
+        $setup->getConnection()->createTable($table);
 
         $setup->endSetup();
     }

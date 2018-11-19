@@ -17,39 +17,61 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <type name="Flurrybox\EnhancedPrivacy\Cron\Schedule">
+    <preference for="Flurrybox\EnhancedPrivacy\Api\ProcessorsInterface"
+                type="Flurrybox\EnhancedPrivacy\Model\Processors"/>
+    <preference for="Flurrybox\EnhancedPrivacy\Api\CustomerManagementInterface"
+                type="Flurrybox\EnhancedPrivacy\Model\CustomerManagement"/>
+    <preference for="Flurrybox\EnhancedPrivacy\Api\Data\ScheduleSearchResultsInterface"
+                type="Magento\Framework\Api\SearchResults"/>
+    <preference for="Flurrybox\EnhancedPrivacy\Api\Data\ScheduleInterface"
+                type="Flurrybox\EnhancedPrivacy\Model\Schedule"/>
+    <preference for="Flurrybox\EnhancedPrivacy\Api\Data\ReasonInterface"
+                type="Flurrybox\EnhancedPrivacy\Model\Reason"/>
+    <preference for="Flurrybox\EnhancedPrivacy\Api\ScheduleRepositoryInterface"
+                type="Flurrybox\EnhancedPrivacy\Model\ScheduleRepository"/>
+    <preference for="Flurrybox\EnhancedPrivacy\Api\ReasonRepositoryInterface"
+                type="Flurrybox\EnhancedPrivacy\Model\ReasonRepository"/>
+    <preference for="Flurrybox\EnhancedPrivacy\Api\Data\ReasonSearchResultsInterface"
+                type="Magento\Framework\Api\SearchResults"/>
+    <type name="Flurrybox\EnhancedPrivacy\Api\ProcessorsInterface">
         <arguments>
-            <argument name="processors" xsi:type="array">
-                <item name="customer_addresses"
-                      xsi:type="object">Flurrybox\EnhancedPrivacy\Model\Privacy\Delete\CustomerAddresses</item>
-                <item name="customer_compare"
-                      xsi:type="object">Flurrybox\EnhancedPrivacy\Model\Privacy\Delete\CustomerCompare</item>
-                <item name="customer_wishlist"
-                      xsi:type="object">Flurrybox\EnhancedPrivacy\Model\Privacy\Delete\CustomerWishlist</item>
-                <item name="customer_reviews"
-                      xsi:type="object">Flurrybox\EnhancedPrivacy\Model\Privacy\Delete\CustomerReviews</item>
-                <item name="customer_quote"
-                      xsi:type="object">Flurrybox\EnhancedPrivacy\Model\Privacy\Delete\CustomerQuote</item>
-                <item name="customer_data"
-                      xsi:type="object">Flurrybox\EnhancedPrivacy\Model\Privacy\Delete\CustomerData</item>
+            <argument name="deleteProcessors" xsi:type="array">
+                <item name="addresses" xsi:type="object">Flurrybox\EnhancedPrivacy\Privacy\Delete\Addresses</item>
+                <item name="compare" xsi:type="object">Flurrybox\EnhancedPrivacy\Privacy\Delete\Compare</item>
+                <item name="wishlist" xsi:type="object">Flurrybox\EnhancedPrivacy\Privacy\Delete\Wishlist</item>
+                <item name="reviews" xsi:type="object">Flurrybox\EnhancedPrivacy\Privacy\Delete\Reviews</item>
+                <item name="quote" xsi:type="object">Flurrybox\EnhancedPrivacy\Privacy\Delete\Quote</item>
+                <item name="customer" xsi:type="object">Flurrybox\EnhancedPrivacy\Privacy\Delete\Customer</item>
+            </argument>
+            <argument name="exportProcessors" xsi:type="array">
+                <item name="addresses" xsi:type="object">Flurrybox\EnhancedPrivacy\Privacy\Export\Addresses</item>
+                <item name="wishlist" xsi:type="object">Flurrybox\EnhancedPrivacy\Privacy\Export\Wishlist</item>
+                <item name="reviews" xsi:type="object">Flurrybox\EnhancedPrivacy\Privacy\Export\Reviews</item>
+                <item name="quote" xsi:type="object">Flurrybox\EnhancedPrivacy\Privacy\Export\Quote</item>
+                <item name="customer" xsi:type="object">Flurrybox\EnhancedPrivacy\Privacy\Export\Customer</item>
             </argument>
         </arguments>
     </type>
-
-    <type name="Flurrybox\EnhancedPrivacy\Controller\Export\Export">
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
-            <argument name="processors" xsi:type="array">
-                <item name="customer_addresses"
-                      xsi:type="object">Flurrybox\EnhancedPrivacy\Model\Privacy\Export\CustomerAddresses</item>
-                <item name="customer_quote"
-                      xsi:type="object">Flurrybox\EnhancedPrivacy\Model\Privacy\Export\CustomerQuote</item>
-                <item name="customer_data"
-                      xsi:type="object">Flurrybox\EnhancedPrivacy\Model\Privacy\Export\CustomerData</item>
-                <item name="customer_wishlist"
-                      xsi:type="object">Flurrybox\EnhancedPrivacy\Model\Privacy\Export\CustomerWishlist</item>
-                <item name="customer_reviews"
-                      xsi:type="object">Flurrybox\EnhancedPrivacy\Model\Privacy\Export\CustomerReviews</item>
+            <argument name="collections" xsi:type="array">
+                <item name="deletion_reasons_listing_data_source"
+                      xsi:type="string">Flurrybox\EnhancedPrivacy\Model\ResourceModel\Reason\Grid\Collection</item>
             </argument>
+        </arguments>
+    </type>
+    <virtualType name="Flurrybox\EnhancedPrivacy\Model\ResourceModel\Reason\Grid\Collection"
+                 type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">flurrybox_enhancedprivacy_delete_reasons</argument>
+            <argument name="resourceModel"
+                      xsi:type="string">Flurrybox\EnhancedPrivacy\Model\ResourceModel\Reason</argument>
+        </arguments>
+    </virtualType>
+    <type name="Flurrybox\EnhancedPrivacy\Helper\Data">
+        <arguments>
+            <argument name="customerManagement"
+                      xsi:type="object">Flurrybox\EnhancedPrivacy\Api\CustomerManagementInterface\Proxy</argument>
         </arguments>
     </type>
 </config>

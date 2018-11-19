@@ -1,7 +1,6 @@
 @color-red: #ff0101;
 @color-red2: #b30000;
 @color-gray-light01: #f4f4f4;
-@screen__m: 768px;
 
 .button-red {
   &.action.primary {
@@ -28,8 +27,12 @@
       padding: 10px 0;
       width: @screen__m;
     }
+  }
+}
 
-    @media (max-width: @screen__m) {
+.media-width(@extremum, @break) when (@extremum = 'max') and (@break = @screen__m) {
+  .enhanced-privacy-popup {
+    .popup {
       &.content{
         margin: 0;
         padding: 10px;

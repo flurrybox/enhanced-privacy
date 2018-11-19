@@ -14,18 +14,24 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Flurrybox\EnhancedPrivacy\Helper;
 
+use Flurrybox\EnhancedPrivacy\Api\CustomerManagementInterface;
+use Flurrybox\EnhancedPrivacy\Model\Source\Config\Schema;
+use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
 use Magento\Store\Model\ScopeInterface;
 
 /**
- * Module configuration helper.
+ * Module configuration and utility helper.
  */
 class Data extends AbstractHelper
 {
     /**
-     * Config XML paths
+     * Configuration paths.
      */
     const CONFIG_ENABLE = 'customer/enhancedprivacy/general/enable';
     const CONFIG_INFORMATION_PAGE = 'customer/enhancedprivacy/general/information_page';
@@ -33,6 +39,8 @@ class Data extends AbstractHelper
     const CONFIG_ACCOUNT_DELETION_ENABLED = 'customer/enhancedprivacy/account/account_deletion_enabled';
     const CONFIG_ACCOUNT_DELETION_SCHEMA = 'customer/enhancedprivacy/account/deletion_schema';
     const CONFIG_ACCOUNT_DELETION_TIME = 'customer/enhancedprivacy/account/deletion_time';
+    const CONFIG_ACCOUNT_DELETION_TITLE = 'customer/enhancedprivacy/account/account_deletion_title';
+    const CONFIG_ACCOUNT_DELETION_BUTTON_TEXT = 'customer/enhancedprivacy/account/account_deletion_button_text';
     const CONFIG_SUCCESS_MESSAGE = 'customer/enhancedprivacy/account/success_message';
     const CONFIG_ACCOUNT_DELETION_INFO = 'customer/enhancedprivacy/account/account_deletion_info';
     const CONFIG_ACCOUNT_DELETION_REASON_INFO = 'customer/enhancedprivacy/account/account_delete_reason_info';
@@ -40,22 +48,50 @@ class Data extends AbstractHelper
     const CONFIG_ACCOUNT_ANONYMIZATION_MESSAGE = 'customer/enhancedprivacy/account/account_anonymization_message';
     const CONFIG_ACCOUNT_EXPORT_ENABLED = 'customer/enhancedprivacy/export/account_export_enabled';
     const CONFIG_ACCOUNT_EXPORT_INFORMATION = 'customer/enhancedprivacy/export/export_information';
+    const CONFIG_ACCOUNT_EXPORT_TITLE = 'customer/enhancedprivacy/export/export_title';
+    const CONFIG_ACCOUNT_EXPORT_DATA_BUTTON_TEXT = 'customer/enhancedprivacy/export/export_button_text';
     const CONFIG_ACCOUNT_POPUP_NOTIFICATION_ENABLED = 'customer/enhancedprivacy/cookie/popup_notification_enabled';
     const CONFIG_ACCOUNT_POPUP_TEXT = 'customer/enhancedprivacy/cookie/popup_text';
 
     /**
-     * Schedule types
+     * Schedule types.
      */
     const SCHEDULE_TYPE_DELETE = 'delete';
     const SCHEDULE_TYPE_ANONYMIZE = 'anonymize';
 
     /**
-     * Cookies names
+     * Cookie name.
      */
     const COOKIE_COOKIES_POLICY = 'cookies-policy';
 
     /**
-     * Is Flurrybox EnhancedPrivacy module enabled
+     * Helper constants.
+     */
+    const ANONYMOUS_STR = 'Anonymous';
+    const ANONYMOUS_DATE = 1;
+
+    /**
+     * @var CustomerManagementInterface
+     */
+    protected $customerManagement;
+
+    /**
+     * Data constructor.
+     *
+     * @param Context $context
+     * @param CustomerManagementInterface $customerManagement
+     */
+    public function __construct(
+        Context $context,
+        CustomerManagementInterface $customerManagement
+    ) {
+        parent::__construct($context);
+
+        $this->customerManagement = $customerManagement;
+    }
+
+    /**
+     * Check if module is enabled.
      *
      * @return bool
      */
@@ -65,7 +101,7 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Get privacy information page url
+     * Get privacy information page url.
      *
      * @return string|null
      */
@@ -75,7 +111,7 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Get brief information about privacy
+     * Get brief information about privacy.
      *
      * @return string|null
      */
@@ -85,7 +121,7 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Get success message
+     * Get success message.
      *
      * @return string|null
      */
@@ -95,7 +131,7 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Is account deletion enabled
+     * Check if account deletion is enabled.
      *
      * @return bool
      */
@@ -116,7 +152,7 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Get account deletion schema type.
+     * Get account deletion time.
      *
      * @return int
      */
@@ -126,7 +162,27 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Get account deletion information
+     * Get account deletion button text.
+     *
+     * @return string|null
+     */
+    public function getDeletionTitle()
+    {
+        return $this->scopeConfig->getValue(self::CONFIG_ACCOUNT_DELETION_TITLE, ScopeInterface::SCOPE_STORE);
+    }
+
+    /**
+     * Get account deletion button text.
+     *
+     * @return string|null
+     */
+    public function getDeletionButtonText()
+    {
+        return $this->scopeConfig->getValue(self::CONFIG_ACCOUNT_DELETION_BUTTON_TEXT, ScopeInterface::SCOPE_STORE);
+    }
+
+    /**
+     * Get account deletion information.
      *
      * @return string|null
      */
@@ -136,7 +192,7 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Get information about deletion reason
+     * Get information about deletion reason.
      *
      * @return string|null
      */
@@ -146,7 +202,7 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Is anonymization message enabled
+     * Check if anonymization message is enabled.
      *
      * @return bool
      */
@@ -157,7 +213,7 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Returns anonymization message string
+     * Get anonymization message.
      *
      * @return string|null
      */
@@ -167,7 +223,7 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Is account data export enabled
+     * Check if account data export is enabled.
      *
      * @return bool
      */
@@ -177,7 +233,7 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Get information about export
+     * Get information about export.
      *
      * @return string|null
      */
@@ -187,7 +243,27 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Is popup notification enabled
+     * Get account deletion button text.
+     *
+     * @return string|null
+     */
+    public function getExportTitle()
+    {
+        return $this->scopeConfig->getValue(self::CONFIG_ACCOUNT_EXPORT_TITLE, ScopeInterface::SCOPE_STORE);
+    }
+
+    /**
+     * Get account deletion button text.
+     *
+     * @return string|null
+     */
+    public function getExportButtonText()
+    {
+        return $this->scopeConfig->getValue(self::CONFIG_ACCOUNT_EXPORT_DATA_BUTTON_TEXT, ScopeInterface::SCOPE_STORE);
+    }
+
+    /**
+     * Check if popup notification is enabled.
      *
      * @return bool
      */
@@ -198,12 +274,37 @@ class Data extends AbstractHelper
     }
 
     /**
-     * Get popup notification text
+     * Get popup notification text.
      *
      * @return string|null
      */
     public function getPopupNotificationText()
     {
         return $this->scopeConfig->getValue(self::CONFIG_ACCOUNT_POPUP_TEXT, ScopeInterface::SCOPE_STORE);
+    }
+
+    /**
+     * Get deletion type.
+     *
+     * @param CustomerInterface $customer
+     *
+     * @return string
+     */
+    public function getDeletionType(CustomerInterface $customer)
+    {
+        switch ($this->getDeletionSchema()) {
+            case Schema::DELETE:
+                return self::SCHEDULE_TYPE_DELETE;
+
+            case Schema::ANONYMIZE:
+                return self::SCHEDULE_TYPE_ANONYMIZE;
+
+            case Schema::DELETE_ANONYMIZE:
+                return $this->customerManagement->hasOrders($customer) ?
+                    self::SCHEDULE_TYPE_DELETE :
+                    self::SCHEDULE_TYPE_ANONYMIZE;
+        }
+
+        return self::SCHEDULE_TYPE_DELETE;
     }
 }

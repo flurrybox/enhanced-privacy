@@ -14,54 +14,35 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Flurrybox\EnhancedPrivacy\Cron;
 
 use Exception;
-use Flurrybox\EnhancedPrivacy\Api\DataDeleteInterface;
-use Flurrybox\EnhancedPrivacy\Helper\Data;
-use Flurrybox\EnhancedPrivacy\Model\ResourceModel\CronSchedule\CollectionFactory;
+use Flurrybox\EnhancedPrivacy\Api\CustomerManagementInterface;
+use Flurrybox\EnhancedPrivacy\Api\Data\ReasonInterfaceFactory;
+use Flurrybox\EnhancedPrivacy\Api\Data\ScheduleInterface;
+use Flurrybox\EnhancedPrivacy\Api\ReasonRepositoryInterface;
+use Flurrybox\EnhancedPrivacy\Api\ScheduleRepositoryInterface;
+use Flurrybox\EnhancedPrivacy\Helper\Data as PrivacyHelper;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\CustomerInterface;
-use Magento\Framework\Registry;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Event\ManagerInterface;
+use Magento\Framework\Exception\StateException;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Psr\Log\LoggerInterface;
-use Flurrybox\EnhancedPrivacy\Model\ReasonsFactory;
-use RuntimeException;
 
 /**
- * Scheduler to clean accounts marked to be deleted or anonymized.
+ * Class DeletionSchedule.
  */
 class Schedule
 {
     /**
-     * @var LoggerInterface
+     * @var PrivacyHelper
      */
-    protected $logger;
-
-    /**
-     * @var CollectionFactory
-     */
-    protected $collectionFactory;
-
-    /**
-     * @var CustomerRepositoryInterface
-     */
-    protected $customerRepository;
-
-    /**
-     * @var Registry
-     */
-    protected $registry;
-
-    /**
-     * @var ReasonsFactory
-     */
-    protected $reasonFactory;
-
-    /**
-     * @var Data
-     */
-    protected $helper;
+    protected $privacyHelper;
 
     /**
      * @var DateTime
@@ -69,121 +50,155 @@ class Schedule
     protected $dateTime;
 
     /**
-     * @var array|DataDeleteInterface[]
+     * @var ScheduleRepositoryInterface
      */
-    protected $processors;
+    protected $scheduleRepository;
 
     /**
-     * AccountCleaner constructor.
+     * @var SearchCriteriaBuilder
+     */
+    protected $criteriaBuilder;
+
+    /**
+     * @var CustomerManagementInterface
+     */
+    protected $customerManagement;
+
+    /**
+     * @var CustomerRepositoryInterface
+     */
+    protected $customerRepository;
+
+    /**
+     * @var ReasonInterfaceFactory
+     */
+    protected $reasonFactory;
+
+    /**
+     * @var ReasonRepositoryInterface
+     */
+    protected $reasonRepository;
+
+    /**
+     * @var ResourceConnection
+     */
+    protected $resourceConnection;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
+     * @var ManagerInterface
+     */
+    protected $eventManager;
+
+    /**
+     * DeletionSchedule constructor.
      *
-     * @param LoggerInterface $logger
-     * @param CollectionFactory $collectionFactory
-     * @param CustomerRepositoryInterface $customerRepository
-     * @param Registry $registry
-     * @param ReasonsFactory $reasonFactory
-     * @param Data $helper
+     * @param PrivacyHelper $privacyHelper
      * @param DateTime $dateTime
-     * @param DataDeleteInterface[] $processors
+     * @param ScheduleRepositoryInterface $scheduleRepository
+     * @param SearchCriteriaBuilder $criteriaBuilder
+     * @param CustomerManagementInterface $customerManagement
+     * @param CustomerRepositoryInterface $customerRepository
+     * @param ReasonInterfaceFactory $reasonFactory
+     * @param ReasonRepositoryInterface $reasonRepository
+     * @param ResourceConnection $resourceConnection
+     * @param LoggerInterface $logger
+     * @param ManagerInterface $eventManager
      */
     public function __construct(
-        LoggerInterface $logger,
-        CollectionFactory $collectionFactory,
-        CustomerRepositoryInterface $customerRepository,
-        Registry $registry,
-        ReasonsFactory $reasonFactory,
-        Data $helper,
+        PrivacyHelper $privacyHelper,
         DateTime $dateTime,
-        array $processors = []
+        ScheduleRepositoryInterface $scheduleRepository,
+        SearchCriteriaBuilder $criteriaBuilder,
+        CustomerManagementInterface $customerManagement,
+        CustomerRepositoryInterface $customerRepository,
+        ReasonInterfaceFactory $reasonFactory,
+        ReasonRepositoryInterface $reasonRepository,
+        ResourceConnection $resourceConnection,
+        LoggerInterface $logger,
+        ManagerInterface $eventManager
     ) {
-        $this->logger = $logger;
-        $this->collectionFactory = $collectionFactory;
-        $this->customerRepository = $customerRepository;
-        $this->registry = $registry;
-        $this->reasonFactory = $reasonFactory;
-        $this->helper = $helper;
+        $this->privacyHelper = $privacyHelper;
         $this->dateTime = $dateTime;
-        $this->processors = $processors;
+        $this->scheduleRepository = $scheduleRepository;
+        $this->criteriaBuilder = $criteriaBuilder;
+        $this->customerManagement = $customerManagement;
+        $this->customerRepository = $customerRepository;
+        $this->reasonFactory = $reasonFactory;
+        $this->reasonRepository = $reasonRepository;
+        $this->resourceConnection = $resourceConnection;
+        $this->logger = $logger;
+        $this->eventManager = $eventManager;
     }
 
     /**
-     * Check for accounts which need to be deleted and delete them.
+     * Process scheduled customer deletion and anonymization.
      *
      * @return void
      */
     public function execute()
     {
-        if (!$this->helper->isModuleEnabled() || !$this->helper->isAccountDeletionEnabled()) {
+        if (!($this->privacyHelper->isModuleEnabled() && $this->privacyHelper->isAccountDeletionEnabled())) {
             return;
         }
 
-        $cronSchedule = $this->collectionFactory
-            ->create()
-            ->addFieldToFilter('scheduled_at', ['lteq' => date('Y-m-d H:i:s', $this->dateTime->gmtTimestamp())]);
+        $criteria = $this->criteriaBuilder
+            ->addFilter(ScheduleInterface::SCHEDULED_AT, date('Y-m-d H:i:s', $this->dateTime->gmtTimestamp()), 'lteq')
+            ->create();
+        $collection = $this->scheduleRepository->getList($criteria);
 
-        if (!$cronSchedule->getItems()) {
+        $this->eventManager->dispatch('enhancedprivacy_load_schedule_list', ['collection' => $collection]);
+
+        if (!$collection->getTotalCount()) {
             return;
         }
 
-        try {
-            $this->registry->register('isSecureArea', true);
-        } catch (RuntimeException $e) {
-            // area is already set
-        }
-
-        foreach ($cronSchedule->getItems() as $item) {
+        foreach ($collection->getItems() as $schedule) {
             try {
-                $this->process(
-                    $this->customerRepository->getById($item->getData('customer_id')),
-                    $item->getData('type')
-                );
+                $this->resourceConnection->getConnection()->beginTransaction();
 
-                $this->saveReason($item->getData('reason'));
-                $item->getResource()->delete($item);
+                $customer = $this->customerRepository->getById($schedule->getCustomerId());
+
+                $this->processCustomer($schedule, $customer);
+
+                $reason = $this->reasonFactory->create();
+                $reason->setReason($schedule->getReason());
+
+                $this->reasonRepository->save($reason);
+                $this->scheduleRepository->delete($schedule);
             } catch (Exception $e) {
+                $this->resourceConnection->getConnection()->rollBack();
                 $this->logger->error($e->getMessage());
             }
         }
     }
 
     /**
-     * Process data deletion or anonymization.
+     * Process customer deletion or anonymization.
      *
+     * @param ScheduleInterface $schedule
      * @param CustomerInterface $customer
-     * @param string $type
      *
      * @return void
+     * @throws StateException
      */
-    protected function process(CustomerInterface $customer, string $type)
+    protected function processCustomer(ScheduleInterface $schedule, CustomerInterface $customer)
     {
-        foreach ($this->processors as $processor) {
-            if (!$processor instanceof DataDeleteInterface) {
-                continue;
-            }
+        switch ($schedule->getType()) {
+            case ScheduleInterface::TYPE_DELETE:
+                $this->customerManagement->deleteCustomer($customer);
+                break;
 
-            switch ($type) {
-                case Data::SCHEDULE_TYPE_DELETE:
-                    $processor->delete($customer);
-                    break;
+            case ScheduleInterface::TYPE_ANONYMIZE:
+                $this->customerManagement->anonymizeCustomer($customer);
+                break;
 
-                case Data::SCHEDULE_TYPE_ANONYMIZE:
-                    $processor->anonymize($customer);
-                    break;
-            }
+            default:
+                throw new StateException(__('Unknown schedule type!'));
         }
-    }
-
-    /**
-     * Save reason why account was deleted or anonymized.
-     *
-     * @param string $reason
-     * @throws Exception
-     */
-    public function saveReason($reason)
-    {
-        $model = $this->reasonFactory
-            ->create()
-            ->setData('reason', $reason);
-
-        $model->getResource()->save($model);
     }
 }

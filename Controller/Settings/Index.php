@@ -14,42 +14,49 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Flurrybox\EnhancedPrivacy\Controller\Settings;
 
-use Flurrybox\EnhancedPrivacy\Helper\Data;
-use Magento\Customer\Model\Session;
-use Magento\Framework\App\Action\Action;
+use Flurrybox\EnhancedPrivacy\Helper\Data as PrivacyHelper;
+use Magento\Customer\Controller\AbstractAccount;
+use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\ResultFactory;
 
 /**
  * Settings controller.
  */
-class Index extends Action
+class Index extends AbstractAccount
 {
     /**
-     * @var Data
+     * @var PrivacyHelper
      */
-    protected $helper;
+    protected $privacyHelper;
 
     /**
-     * @var Session
+     * @var CustomerSession
      */
-    protected $session;
+    protected $customerSession;
 
     /**
      * Index constructor.
      *
      * @param Context $context
-     * @param Data $helper
-     * @param Session $session
+     * @param PrivacyHelper $privacyHelper
+     * @param CustomerSession $customerSession
      */
-    public function __construct(Context $context, Data $helper, Session $session)
-    {
+    public function __construct(
+        Context $context,
+        PrivacyHelper $privacyHelper,
+        CustomerSession $customerSession
+    ) {
         parent::__construct($context);
 
-        $this->helper = $helper;
-        $this->session = $session;
+        $this->privacyHelper = $privacyHelper;
+        $this->customerSession = $customerSession;
     }
 
     /**
@@ -62,31 +69,20 @@ class Index extends Action
      */
     public function dispatch(RequestInterface $request)
     {
-        if (!$this->session->authenticate()) {
-            $this->_actionFlag->set('', 'no-dispatch', true);
-        }
-
-        if (!$this->helper->isModuleEnabled()){
-            $this->_forward('no_route');
+        if (!$this->privacyHelper->isModuleEnabled()){
+            $this->_forward('noroute');
         }
 
         return parent::dispatch($request);
     }
 
     /**
-     * Execute controller.
+     * Execute action.
      *
-     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface|void
+     * @return \Magento\Framework\Controller\ResultInterface|ResponseInterface
      */
     public function execute()
     {
-        $this->_view->loadLayout();
-
-        if ($block = $this->_view->getLayout()->getBlock('privacy_settings')) {
-            $block->setRefererUrl($this->_redirect->getRefererUrl());
-        }
-
-        $this->_view->getPage()->getConfig()->getTitle()->set(__('Privacy settings'));
-        $this->_view->renderLayout();
+        return $this->resultFactory->create(ResultFactory::TYPE_PAGE);
     }
 }

@@ -14,6 +14,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Flurrybox\EnhancedPrivacy\Model\Source\Config;
 
 use Magento\Framework\Option\ArrayInterface;
@@ -23,9 +25,12 @@ use Magento\Framework\Option\ArrayInterface;
  */
 class Schema implements ArrayInterface
 {
-    const DELETE = 0;
-    const ANONYMIZE = 1;
-    const DELETE_ANONYMIZE = 2;
+    /**
+     * Schemas.
+     */
+    const DELETE = 1;
+    const ANONYMIZE = 2;
+    const DELETE_ANONYMIZE = 3;
 
     /**
      * Options getter.
@@ -35,18 +40,9 @@ class Schema implements ArrayInterface
     public function toOptionArray()
     {
         return [
-            [
-                'value' => self::DELETE,
-                'label' => __('Always delete')
-            ],
-            [
-                'value' => self::ANONYMIZE,
-                'label' => __('Always anonymize')
-            ],
-            [
-                'value' => self::DELETE_ANONYMIZE,
-                'label' => __('Delete if no orders made, anonymize otherwise')
-            ]
+            ['value' => self::DELETE, 'label' => __('Always delete')],
+            ['value' => self::ANONYMIZE, 'label' => __('Always anonymize')],
+            ['value' => self::DELETE_ANONYMIZE, 'label' => __('Delete if no orders made, anonymize otherwise')]
         ];
     }
 

@@ -19,7 +19,7 @@
         xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
     <router id="standard">
         <route id="privacy" frontName="privacy">
-            <module name="Flurrybox_EnhancedPrivacy" />
+            <module name="Flurrybox_EnhancedPrivacy"/>
         </route>
     </router>
 </config>

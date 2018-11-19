@@ -37,6 +37,8 @@
                 </account>
                 <export>
                     <export_information>You can export the data we have about you using the button below.</export_information>
+                    <export_button_text>Export my data</export_button_text>
+                    <export_title>Export your personal data</export_title>
                 </export>
                 <cookie>
                     <popup_notification_enabled>1</popup_notification_enabled>
