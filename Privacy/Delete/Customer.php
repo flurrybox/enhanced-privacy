@@ -27,6 +27,7 @@ use Magento\Customer\Api\Data\GroupInterface;
 use Magento\Eav\Model\Entity\Attribute\Source\Boolean;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Math\Random;
+use Magento\Framework\Registry;
 
 /**
  * Process customer data.
@@ -49,20 +50,28 @@ class Customer implements DataDeleteInterface
     protected $random;
 
     /**
+     * @var Registry
+     */
+    protected $registry;
+
+    /**
      * CustomerData constructor.
      *
      * @param CustomerRepositoryInterface $customerRepository
      * @param EncryptorInterface $encryptor
      * @param Random $random
+     * @param Registry $registry
      */
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
         EncryptorInterface $encryptor,
-        Random $random
+        Random $random,
+        Registry $registry
     ) {
         $this->customerRepository = $customerRepository;
         $this->encryptor = $encryptor;
         $this->random = $random;
+        $this->registry = $registry;
     }
 
     /**
@@ -76,6 +85,9 @@ class Customer implements DataDeleteInterface
      */
     public function delete(CustomerInterface $customer)
     {
+        /** @see \Magento\Framework\Model\ActionValidator\RemoveAction::isAllowed() **/
+        $this->registry->register('isSecureArea', true);
+
         $this->customerRepository->deleteById($customer->getId());
     }
 

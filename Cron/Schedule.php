@@ -20,9 +20,7 @@ namespace Flurrybox\EnhancedPrivacy\Cron;
 
 use Exception;
 use Flurrybox\EnhancedPrivacy\Api\CustomerManagementInterface;
-use Flurrybox\EnhancedPrivacy\Api\Data\ReasonInterfaceFactory;
 use Flurrybox\EnhancedPrivacy\Api\Data\ScheduleInterface;
-use Flurrybox\EnhancedPrivacy\Api\ReasonRepositoryInterface;
 use Flurrybox\EnhancedPrivacy\Api\ScheduleRepositoryInterface;
 use Flurrybox\EnhancedPrivacy\Helper\Data as PrivacyHelper;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -70,16 +68,6 @@ class Schedule
     protected $customerRepository;
 
     /**
-     * @var ReasonInterfaceFactory
-     */
-    protected $reasonFactory;
-
-    /**
-     * @var ReasonRepositoryInterface
-     */
-    protected $reasonRepository;
-
-    /**
      * @var ResourceConnection
      */
     protected $resourceConnection;
@@ -103,8 +91,6 @@ class Schedule
      * @param SearchCriteriaBuilder $criteriaBuilder
      * @param CustomerManagementInterface $customerManagement
      * @param CustomerRepositoryInterface $customerRepository
-     * @param ReasonInterfaceFactory $reasonFactory
-     * @param ReasonRepositoryInterface $reasonRepository
      * @param ResourceConnection $resourceConnection
      * @param LoggerInterface $logger
      * @param ManagerInterface $eventManager
@@ -116,8 +102,6 @@ class Schedule
         SearchCriteriaBuilder $criteriaBuilder,
         CustomerManagementInterface $customerManagement,
         CustomerRepositoryInterface $customerRepository,
-        ReasonInterfaceFactory $reasonFactory,
-        ReasonRepositoryInterface $reasonRepository,
         ResourceConnection $resourceConnection,
         LoggerInterface $logger,
         ManagerInterface $eventManager
@@ -128,8 +112,6 @@ class Schedule
         $this->criteriaBuilder = $criteriaBuilder;
         $this->customerManagement = $customerManagement;
         $this->customerRepository = $customerRepository;
-        $this->reasonFactory = $reasonFactory;
-        $this->reasonRepository = $reasonRepository;
         $this->resourceConnection = $resourceConnection;
         $this->logger = $logger;
         $this->eventManager = $eventManager;
@@ -165,11 +147,9 @@ class Schedule
 
                 $this->processCustomer($schedule, $customer);
 
-                $reason = $this->reasonFactory->create();
-                $reason->setReason($schedule->getReason());
-
-                $this->reasonRepository->save($reason);
                 $this->scheduleRepository->delete($schedule);
+
+                $this->resourceConnection->getConnection()->commit();
             } catch (Exception $e) {
                 $this->resourceConnection->getConnection()->rollBack();
                 $this->logger->error($e->getMessage());
@@ -189,11 +169,11 @@ class Schedule
     protected function processCustomer(ScheduleInterface $schedule, CustomerInterface $customer)
     {
         switch ($schedule->getType()) {
-            case ScheduleInterface::TYPE_DELETE:
+            case PrivacyHelper::SCHEDULE_TYPE_DELETE:
                 $this->customerManagement->deleteCustomer($customer);
                 break;
 
-            case ScheduleInterface::TYPE_ANONYMIZE:
+            case PrivacyHelper::SCHEDULE_TYPE_ANONYMIZE:
                 $this->customerManagement->anonymizeCustomer($customer);
                 break;
 

@@ -2,7 +2,7 @@
     "name": "flurrybox/enhanced-privacy",
     "description": "Magento 2 module to make your store GDPR compatible",
     "type": "magento2-module",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "authors": [
         {
             "name": "Flurrybox",
